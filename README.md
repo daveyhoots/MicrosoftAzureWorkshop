@@ -1,7 +1,7 @@
 # MicrosoftAzureWorkshop
 Supplemental Azure scripts and files to enhance your workshop experience.
 
-## Exercise - Setup Az PowerShell Module
+## Setup Az PowerShell Module
 
 ### Launch PowerShell
 
