@@ -1,4 +1,4 @@
-# MicrosoftAzureWorkshop
+# Microsoft Azure Workshop
 Supplemental Azure scripts and files to enhance your workshop experience.
 
 ## Setup Az PowerShell Module
