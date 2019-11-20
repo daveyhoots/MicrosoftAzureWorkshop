@@ -39,7 +39,7 @@ New-AzureRmResourceGroup -Name 'azuremgmt' -Location 'Central US'
 Get-AzureRmStorageAccountNameAvailability –Name youraliasazuremgmt
 
 # Create the storage account
-New-AzureRMStorageAccount -ResourceGroup ContosoRG1 -Name youraliasazuremgmt -SkuName Standard_LRS -Location “East US”
+New-AzureRMStorageAccount -ResourceGroup azuremgmt -Name youraliasazuremgmt -SkuName Standard_LRS -Location “East US”
 
 # Set the default storage account
 Set-AzureRMCurrentStorageAccount -ResourceGroupName azuremgmt -Name youraliasazuremgmt
@@ -58,13 +58,13 @@ $ctx = New-AzureStorageContext -StorageAccountName $storageaccount -StorageAccou
 New-AzureStorageContainer -Name vhds
 
 # Upload VHDs to Azure storage
-Add-AzureRmVhd -ResourceGroupName "azuremgmt" -Destination "https://dasuarezmgmtdemo.blob.core.windows.net/vhds/datadisk1.vhd" -LocalFilePath "C:\Demo\testdisk.vhd"
+Add-AzureRmVhd -ResourceGroupName "azuremgmt" -Destination "https://youraliasazuremgmt.blob.core.windows.net/vhds/datadisk1.vhd" -LocalFilePath "C:\Demos\testdisk.vhd"
 
 # Download VHDs from Azure storage 
-Save-AzureRmVhd -ResourceGroupName "azuremgmt" -SourceUri "https://dasuarezmgmtdemo.blob.core.windows.net/vhds/datadisk1.vhd" -LocalFilePath "C:\Demo\datadisk1dl.vhd" 
+Save-AzureRmVhd -ResourceGroupName "azuremgmt" -SourceUri "https://youraliasazuremgmt.blob.core.windows.net/vhds/datadisk1.vhd" -LocalFilePath "C:\Demos\datadisk1dl.vhd" 
 
 # Delete your storage account
-Remove-AzureRMStorageAccount -ResourceGroupName azuremgmt -Name dasuarezmgmtdemo
+Remove-AzureRMStorageAccount -ResourceGroupName azuremgmt -Name youraliasazuremgmt
 
 #################################################
 ### Managing Virtual Machines
@@ -74,11 +74,11 @@ Remove-AzureRMStorageAccount -ResourceGroupName azuremgmt -Name dasuarezmgmtdemo
 New-AzureRmResourceGroup -Name 'azuremgmt' -Location 'Central US'
 
 # Create a storage account
-New-AzureRMStorageAccount -ResourceGroup ContosoRG1 -Name youraliasazuremgmt -SkuName Standard_LRS -Location “Central US”
+New-AzureRMStorageAccount -ResourceGroup azuremgmt -Name youraliasazuremgmt -SkuName Standard_LRS -Location “Central US”
 
 # Create Azure Network Security Group
 $rule1 = New-AzureRmNetworkSecurityRuleConfig -Name rdp-rule -Description "Allow RDP" -Access Allow -Protocol Tcp -Direction Inbound -Priority 100 -SourceAddressPrefix Internet -SourcePortRange * -DestinationAddressPrefix * -DestinationPortRange 3389
-$nsg = New-AzureRmNetworkSecurityGroup -ResourceGroupName azuretest -Location eastus -Name "NSG-FrontEnd" -SecurityRules $rule1
+$nsg = New-AzureRmNetworkSecurityGroup -ResourceGroupName azuremgmt -Location eastus -Name "NSG-FrontEnd" -SecurityRules $rule1
 
 # Create Azure Virtual Network and Subnet
 $subnet = New-AzureRmVirtualNetworkSubnetConfig -Name frontendSubnet -AddressPrefix 10.0.1.0/24
@@ -96,6 +96,9 @@ Get-AzureRmVirtualNetwork -Name myVnet -ResourceGroupName azuremgmt
 # Create Network Interface Card (NIC)
 New-AzureRmNetworkInterface -Name vmnic1 -ResourceGroupName azuremgmt -Location "Central US" -SubnetId '/subscriptions/<Sub ID>/resourceGroups/azuremgmt/providers/Microsoft.Network/virtualNetworks/myVnet/subnets/frontendSubnet' -PublicIpAddressId '/subscriptions/<Sub ID>/resourceGroups/azuremgmt/providers/Microsoft.Network/publicIPAddresses/mypip'
 
+# Get the NIC resource ID
+Get-AzureRmNetworkInterface -Name vmnic1 -ResourceGroupName azuremgmt
+
 # Step 8: Get Virtual Machine publisher, Image Offer, Sku and Image
 Get-AzureRmVMImagePublisher -Location eastus 
 Get-AzureRmVMImageoffer -Location eastus -publisher MicrosoftWindowsServer
@@ -103,9 +106,13 @@ Get-AzureRmVMImageSku -Location eastus -PublisherName MicrosoftWindowsServer -Of
 Get-AzureRmVMImage -Location eastus -PublisherName MicrosoftWindowsServer -Offer WindowsServer -sku 2019-Datacenter
 
 # Step 9: Create an virtual machine configuration file
+$VMName = "MyVM"
+$ComputerName = "MyWindowsVM"
+$VMSize = "Standard_B2s"
+
 $VM = New-AzureRmVMConfig -VMName $VMName -VMSize $VMSize
-$VM = Set-AzureRmVMOperatingSystem -VM $VM -Windows -ComputerName $ComputerName -Credential $Credential -ProvisionVMAgent -EnableAutoUpdate
-$VM = Add-AzureRmVMNetworkInterface -VM $VM -Id $NIC.Id
+$VM = Set-AzureRmVMOperatingSystem -VM $VM -Windows -ComputerName $ComputerName -ProvisionVMAgent -EnableAutoUpdate
+$VM = Add-AzureRmVMNetworkInterface -VM $VM -Id '/subscriptions/<Sub ID>/resourceGroups/azuremgmt/providers/Microsoft.Network/networkInterfaces/vmnic1'
 $VM = Set-AzureRmVMSourceImage -VM $VM -PublisherName 'MicrosoftWindowsServer' -Offer 'WindowsServer' -Skus '2012-R2-Datacenter' -Version latest
 
 # Step 10: Create Azure Virtual Machine
