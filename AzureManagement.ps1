@@ -70,21 +70,21 @@ Remove-AzureRMStorageAccount -ResourceGroupName azuremgmt -Name youraliasazuremg
 ### Managing Virtual Machines
 #################################################
 
-# Create a resource group
+# Step 1: Create a resource group
 New-AzureRmResourceGroup -Name 'azuremgmt' -Location 'Central US'
 
-# Create a storage account
+# Step 2: Create a storage account
 New-AzureRMStorageAccount -ResourceGroup azuremgmt -Name youraliasazuremgmt -SkuName Standard_LRS -Location “Central US”
 
-# Create Azure Network Security Group
+# Step 3: Create Azure Network Security Group
 $rule1 = New-AzureRmNetworkSecurityRuleConfig -Name rdp-rule -Description "Allow RDP" -Access Allow -Protocol Tcp -Direction Inbound -Priority 100 -SourceAddressPrefix Internet -SourcePortRange * -DestinationAddressPrefix * -DestinationPortRange 3389
 $nsg = New-AzureRmNetworkSecurityGroup -ResourceGroupName azuremgmt -Location eastus -Name "NSG-FrontEnd" -SecurityRules $rule1
 
-# Create Azure Virtual Network and Subnet
+# Step 4 & 5: Create Azure Virtual Network and Subnet
 $subnet = New-AzureRmVirtualNetworkSubnetConfig -Name frontendSubnet -AddressPrefix 10.0.1.0/24
 New-AzureRmVirtualNetwork -Name myVnet -ResourceGroupName azuremgmt -Location "Central US" -AddressPrefix 10.0.0.0/16 -Subnet $subnet
 
-# Create Azure Public IP Address
+# Step 6: Create Azure Public IP Address
 New-AzureRmPublicIpAddress -Name myPip -ResourceGroupName azuremgmt -Location "Central US" -AllocationMethod Static
 
 # Get the Public IP Address resource ID
@@ -93,7 +93,7 @@ Get-AzureRmPublicIpAddress -Name myPip -ResourceGroupName azuremgmt
 # Get the subnet resource ID
 Get-AzureRmVirtualNetwork -Name myVnet -ResourceGroupName azuremgmt
 
-# Create Network Interface Card (NIC)
+# Step 7: Create Network Interface Card (NIC)
 New-AzureRmNetworkInterface -Name vmnic1 -ResourceGroupName azuremgmt -Location "Central US" -SubnetId '/subscriptions/<Sub ID>/resourceGroups/azuremgmt/providers/Microsoft.Network/virtualNetworks/myVnet/subnets/frontendSubnet' -PublicIpAddressId '/subscriptions/<Sub ID>/resourceGroups/azuremgmt/providers/Microsoft.Network/publicIPAddresses/mypip'
 
 # Get the NIC resource ID
