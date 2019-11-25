@@ -7,6 +7,8 @@
 $PSVersionTable.PSVersion
 
 # Install the Az module from the PowerShell Gallery for the active user
+# WARNING: The Az and AzureRm modules cannot run side-by-side. If you already have the AzureRm module installed, you must uninstall AzureRm first.
+# Note: The LOD lab machine has AzureRm pre-installed, you can simply skip to line 17.
 Install-Module -Name Az -AllowClobber -Scope CurrentUser
 
 # Enable AzureRM compatibility aliases
