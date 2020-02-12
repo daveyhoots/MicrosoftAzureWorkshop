@@ -11,9 +11,6 @@ $PSVersionTable.PSVersion
 # Note: The LOD lab machine has AzureRm pre-installed
 Install-Module -Name Az -AllowClobber -Scope CurrentUser
 
-# Enable Az compatibility aliases
-Enable-AzAlias -Scope CurrentUser
-
 # Get Azure PowerShell modules and versions
 Get-Module -ListAvailable Az*
 
